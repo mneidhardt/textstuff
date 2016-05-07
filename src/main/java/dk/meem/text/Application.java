@@ -28,8 +28,6 @@ public class Application {
     }
     
     public void run(String filename, int lowerbound) {
-    	List<String> charsfound = new ArrayList<String>();
-    	
     	try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
 
 			String line;
@@ -45,22 +43,18 @@ public class Application {
 				for (int i=0; i<chars.length; i++) {
 					int cp = Character.codePointAt(chars, i);
 					if (cp > lowerbound) {
-						hits += "[" + chars[i] + "=" + cp + "] ";
+						hits += "[" + chars[i] + "=" + cp + " @" + (i+1) + "] ";
 					}
 				}
 				
 				if ( ! hits.isEmpty()) {
-					charsfound.add(linecount + ":" + hits);
+					System.out.println(linecount + ":" + hits);
 				}
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    	
-    	for (String entry : charsfound) {
-    		System.out.println(entry);
-    	}
     }
     
 }
