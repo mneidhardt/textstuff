@@ -3,7 +3,6 @@ package dk.meem.text;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -28,46 +27,44 @@ public class Application {
     		}
         	new Application().run(args[0], lowerbound, charset);
     	} catch (Exception e) {
+    		System.err.println("Exception: " + e.getMessage());
     		System.err.println("Args: filename [lowerbound [encodingcharset]]");
     		System.err.println("lowerbound: All codepoints equal to or greater than this, will be reported. Default is 127");
-    		System.err.println("encodingcharset: E.g 'UTF8'. Default is ??");
-    		
+    		System.err.println("encodingcharset: E.g 'UTF8'. Defaults to the JVM default charset");
+    		if (args.length < 3) {
+    			System.err.println("Default charset: " + charset);
+    		}
     	}
     }
     
-    public void run(String filename, int lowerbound, String charset) throws FileNotFoundException, UnsupportedEncodingException {
-    	System.out.println("Using charset " + charset);
-    	//try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-        try {
-        	BufferedReader br = new BufferedReader(
-     			   new InputStreamReader(
-     	                      new FileInputStream(filename), charset));
-        	
-			String line;
-			int linecount=0;
-			
-			while ((line = br.readLine()) != null) {
-				++linecount;
-				String n = Normalizer.normalize(line.trim(), Normalizer.Form.NFC);
+    public void run(String filename, int lowerbound, String charset) throws IOException, FileNotFoundException, UnsupportedEncodingException {
+    	System.out.println("#Reporting all codepoints above " + (lowerbound-1));
+    	System.out.println("#Using charset " + charset);
 
-				char[] chars = n.toCharArray();
-				String hits = "";
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), charset));
 
-				for (int i=0; i<chars.length; i++) {
-					int cp = Character.codePointAt(chars, i);
-					if (cp > lowerbound) {
-						hits += "[" + chars[i] + "=" + cp + " @" + (i+1) + "] ";
-					}
-				}
-				
-				if ( ! hits.isEmpty()) {
-					System.out.println(linecount + ":" + hits);
+		String line;
+		int linecount = 0;
+
+		while ((line = br.readLine()) != null) {
+			++linecount;
+			String n = Normalizer.normalize(line.trim(), Normalizer.Form.NFC);
+
+			char[] chars = n.toCharArray();
+			String hits = "";
+
+			for (int i = 0; i < chars.length; i++) {
+				int cp = Character.codePointAt(chars, i);
+				if (cp > lowerbound) {
+					hits += "[" + chars[i] + "=" + cp + " @" + (i + 1) + "] ";
 				}
 			}
 
-			br.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			if (!hits.isEmpty()) {
+				System.out.println(linecount + ":" + hits);
+			}
 		}
+
+		br.close();
     }
 }
