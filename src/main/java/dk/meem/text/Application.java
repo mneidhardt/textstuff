@@ -38,8 +38,8 @@ public class Application {
     }
     
     public void run(String filename, int lowerbound, String charset) throws IOException, FileNotFoundException, UnsupportedEncodingException {
-    	System.out.println("#Reporting all codepoints above " + (lowerbound-1));
-    	System.out.println("#Using charset " + charset);
+    	System.out.println("#Reporting all codepoints above " + lowerbound + ".");
+    	System.out.println("#Using charset " + charset + ".");
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), charset));
 
