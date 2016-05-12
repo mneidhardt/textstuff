@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Application {
 
@@ -29,8 +31,8 @@ public class Application {
     	} catch (Exception e) {
     		System.err.println("Exception: " + e.getMessage());
     		System.err.println("Args: filename [lowerbound [encodingcharset]]");
-    		System.err.println("lowerbound: All codepoints equal to or greater than this, will be reported. Default is 127");
-    		System.err.println("encodingcharset: E.g 'UTF8'. Defaults to the JVM default charset");
+    		System.err.println("lowerbound: All codepoints equal to or greater than this, will be reported. Default is 127.");
+    		System.err.println("encodingcharset: E.g 'UTF-8'. Defaults to the JVM default charset.");
     		if (args.length < 3) {
     			System.err.println("Default charset: " + charset);
     		}
@@ -48,23 +50,43 @@ public class Application {
 
 		while ((line = br.readLine()) != null) {
 			++linecount;
-			String n = Normalizer.normalize(line.trim(), Normalizer.Form.NFC);
+			
+			String hits = containsCharsAbove(line, lowerbound);
+			int spacecount = containsSpaces(line);
 
-			char[] chars = n.toCharArray();
-			String hits = "";
-
-			for (int i = 0; i < chars.length; i++) {
-				int cp = Character.codePointAt(chars, i);
-				if (cp > lowerbound) {
-					hits += "[" + chars[i] + "=" + cp + " @" + (i + 1) + "] ";
-				}
+			if (!hits.isEmpty() || spacecount > 0) {
+				System.out.println(linecount + " [s" + spacecount + "] :" + hits);
 			}
-
-			if (!hits.isEmpty()) {
-				System.out.println(linecount + ":" + hits);
-			}
+			
 		}
 
 		br.close();
+    }
+
+    public String containsCharsAbove(String line, int lowerbound) {
+		String n = Normalizer.normalize(line.trim(), Normalizer.Form.NFC);
+
+		char[] chars = n.toCharArray();
+		String hits = "";
+
+		for (int i = 0; i < chars.length; i++) {
+			int cp = Character.codePointAt(chars, i);
+			if (cp > lowerbound) {
+				hits += "[" + chars[i] + "=" + cp + " @" + (i + 1) + "] ";
+			}
+		}
+		
+		return hits;
+    }
+
+    public int containsSpaces(String line) {
+    	Pattern pattern = Pattern.compile("\\s{2}");
+        Matcher matcher = pattern.matcher(line);
+        int found = 0;
+        while (matcher.find()) {
+        	++found;
+        }
+        
+        return found;
     }
 }
